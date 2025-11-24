@@ -1,0 +1,72 @@
+FROM nvcr.io/nvidia/pytorch:23.10-py3
+
+RUN rm -f /etc/apt/sources.list.d/cuda.list \
+ && apt-get update && apt-get install -y --no-install-recommends \
+    wget \
+ && wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-keyring_1.0-1_all.deb \
+ && dpkg -i cuda-keyring_1.0-1_all.deb \
+ && rm -f cuda-keyring_1.0-1_all.deb
+
+RUN apt-get clean && apt-get update && \
+    apt-get install -y --no-install-recommends --fix-missing \
+    nano curl git zip htop unzip tmux ca-certificates sudo bzip2 \
+    software-properties-common \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+RUN add-apt-repository ppa:deadsnakes/ppa -y && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends --fix-missing \
+    build-essential vim gcc g++ make openssl \
+    python3.10 \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.10 1 && \
+    update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 1
+
+RUN curl -sS https://bootstrap.pypa.io/get-pip.py | python3.10
+
+
+RUN apt update && apt install -y --no-install-recommends apt-transport-https gnupg && \
+    curl -fsSL https://bazel.build/bazel-release.pub.gpg | gpg --dearmor >bazel-archive-keyring.gpg && \
+    mv bazel-archive-keyring.gpg /usr/share/keyrings && \
+    echo "deb [arch=amd64 signed-by=/usr/share/keyrings/bazel-archive-keyring.gpg] https://storage.googleapis.com/bazel-apt stable jdk1.8" > /etc/apt/sources.list.d/bazel.list && \
+    apt update && apt install -y --no-install-recommends bazel-5.3.2 && \
+    ln -sf /usr/bin/bazel-5.3.2 /usr/bin/bazel \
+    && apt-get clean \ 
+    && rm -rf /var/lib/apt/lists/*
+
+RUN apt-get clean && apt-get update && \
+    apt-get install -y --no-install-recommends \
+    ffmpeg \
+    libavcodec-dev libavformat-dev libavdevice-dev libavutil-dev libswscale-dev libavfilter-dev libavresample-dev \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+RUN pip install alias-free-torch==0.0.6 auraloss descript-audio-codec einops einops-exts==0.0.4 ema-pytorch==0.2.3 \
+    gradio huggingface_hub importlib-resources==5.12.0 mpi4py timm==0.9.12 gdown networkx \
+    pandas==2.0.2 pedalboard==0.7.4 prefigure==0.0.9 pytorch_lightning PyWavelets safetensors omegaconf moviepy annoy matplotlib \
+    sentencepiece==0.1.99 s3fs torchmetrics==0.11.4 tqdm fvcore iopath submitit scikit-image \
+    wandb==0.15.4 webdataset==0.2.48 x-transformers diffusers ninja av ffmpeg-python yt-dlp seaborn \
+    librosa scikit_learn==1.0.2 scipy==1.7.3 soundfile==0.11.0 termcolor==2.1.0 hydra-colorlog hydra-core openpyxl==3.1.2 \
+    pytest==7.4.3 pylint==3.0.2 pyloudnorm==0.1.1 pandarallel==1.6.5 julius==0.2.7 mutagen==1.47.0 GitPython==3.1.40 boto3==1.34.60 rich==13.7.1 dictdiffer==0.9.0 \
+    python-dotenv tensordict mauve-text \
+    colorlog==6.9.0 torchlibrosa==0.1.0 resampy==0.2.2 \
+    encodec torchopenl3==1.0.1
+
+RUN python -m pip install pip==24.0
+RUN pip install opencv-python-headless==4.9.0.80 kornia
+RUN pip install git+https://github.com/pytorch/fairseq.git@v0.12.2
+RUN pip install wavencoder==0.1.2 facenet-pytorch==2.5.2 \
+    bitstring==3.1.7 distro==1.5.0 antlr4-python3-runtime==4.8 unify==0.5 \
+    cdpam transformers hypy_utils
+RUN pip install --no-deps ssr-eval==0.0.7
+
+RUN pip uninstall -y torch torchvision torchaudio || true && \
+    pip install torch==2.4.1 torchvision==0.19.1 torchaudio==2.4.1 --index-url https://download.pytorch.org/whl/cu121
+RUN pip install flash-attn==2.4.1
+
+RUN pip install --upgrade pip laion-clap==1.1.7 numpy==1.26.1
+RUN pip install hear21passt 
+RUN pip install imagebind@git+https://github.com/hkchengrex/ImageBind.git 
+RUN pip install soxr
+
+RUN pip uninstall -y transformer-engine apex || true
