@@ -1,5 +1,9 @@
 # Evaluation toolkit for video-to-audio generation
 
+Evaluation toolkit from [SoundReactor](https://arxiv.org/abs/2510.02110)
+
+### Contanct: Koichi Saito: koichi.saito@sony.com
+
 ## Overview
 
 This repository supports the evaluations of:
